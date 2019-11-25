@@ -13,14 +13,18 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-FROM crops/yocto:ubuntu-14.04-base
+# FROM crops/yocto:ubuntu-14.04-base
+# FROM a1234-yocto-docker-test:ubuntu-18.04-base
+FROM obmc20191006-yocto-docker-test:ubuntu-18.04-base
 
 USER root
 
-ADD https://raw.githubusercontent.com/crops/extsdk-container/master/restrict_useradd.sh  \
-        https://raw.githubusercontent.com/crops/extsdk-container/master/restrict_groupadd.sh \
-        https://raw.githubusercontent.com/crops/extsdk-container/master/usersetup.py \
-        /usr/bin/
+#ADD https://raw.githubusercontent.com/crops/extsdk-container/master/restrict_useradd.sh  \
+#        https://raw.githubusercontent.com/crops/extsdk-container/master/restrict_groupadd.sh \
+#        https://raw.githubusercontent.com/crops/extsdk-container/master/usersetup.py \
+#        /usr/bin/
+COPY restrict_useradd.sh restrict_groupadd.sh usersetup.py /usr/bin/
+
 COPY poky-entry.py poky-launch.sh /usr/bin/
 COPY sudoers.usersetup /etc/
 
@@ -43,7 +47,12 @@ RUN userdel -r yoctouser && \
         /usr/bin/restrict_useradd.sh && \
     echo "#include /etc/sudoers.usersetup" >> /etc/sudoers
 
+# RUN echo "set term=builtin_ansi"  > /etc/vim/vimrc.local
+COPY _vimrc /etc/vim/vimrc.local
+# COPY _emacs /home/pokyuser/.emacs
+
 USER usersetup
 ENV LANG=en_US.UTF-8
+ENV TZ=Asia/Shanghai
 
 ENTRYPOINT ["/usr/bin/dumb-init", "--", "/usr/bin/poky-entry.py"]
